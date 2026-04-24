@@ -1,0 +1,22 @@
+import { NestFactory } from '@nestjs/core';
+import { ApiGatewayModule } from './api-gateway.module';
+import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(ApiGatewayModule);
+
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('API_GATEWAY_PORT') || 3000;
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  await app.listen(port);
+  Logger.log(`API Gateway running on port ${port}`, 'Bootstrap');
+}
+void bootstrap();
