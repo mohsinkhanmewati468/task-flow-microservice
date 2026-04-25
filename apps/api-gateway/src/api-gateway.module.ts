@@ -3,11 +3,21 @@ import { ApiGatewayController } from './api-gateway.controller';
 import { ApiGatewayService } from './api-gateway.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 5,
+        },
+      ],
     }),
     ClientsModule.register([
       {
@@ -15,12 +25,18 @@ import { ConfigModule } from '@nestjs/config';
         transport: Transport.TCP,
         options: {
           host: 'localhost',
-          port: 3001,
+          port: Number(process.env.AUTH_SERVICE_PORT),
         },
       },
     ]),
   ],
   controllers: [ApiGatewayController],
-  providers: [ApiGatewayService],
+  providers: [
+    ApiGatewayService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class ApiGatewayModule {}
