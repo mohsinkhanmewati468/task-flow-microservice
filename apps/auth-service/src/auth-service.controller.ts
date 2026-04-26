@@ -1,24 +1,19 @@
 import { Controller } from '@nestjs/common';
 import { AuthServiceService } from './auth-service.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { RegisterDto } from '@app/common';
+import { LoginDto, RegisterDto } from '@app/common';
 
 @Controller()
 export class AuthServiceController {
   constructor(private readonly authServiceService: AuthServiceService) {}
   @MessagePattern('register')
-  register(@Payload() data: RegisterDto) {
-    const user = {
-      id: Date.now(),
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    };
+  register(@Payload() registerDto: RegisterDto) {
+    return this.authServiceService.register(registerDto);
+  }
 
-    return {
-      message: 'User registered',
-      user,
-    };
+  @MessagePattern('login')
+  login(@Payload() loginDto: LoginDto) {
+    return this.authServiceService.login(loginDto);
   }
 
   @MessagePattern('ping')

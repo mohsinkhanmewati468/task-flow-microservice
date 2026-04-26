@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiGatewayService } from './api-gateway.service';
 import { ClientProxy } from '@nestjs/microservices';
-import { RegisterDto } from '@app/common';
+import { LoginDto, RegisterDto } from '@app/common';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller()
 export class ApiGatewayController {
@@ -17,5 +26,16 @@ export class ApiGatewayController {
   @Post('register')
   register(@Body() body: RegisterDto) {
     return this.authClient.send('register', body);
+  }
+
+  @Post('login')
+  login(@Body() body: LoginDto) {
+    return this.authClient.send('login', body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Req() req) {
+    return req.user;
   }
 }

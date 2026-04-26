@@ -5,6 +5,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -19,12 +20,15 @@ import { APP_GUARD } from '@nestjs/core';
         },
       ],
     }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+    }),
     ClientsModule.register([
       {
         name: 'AUTH_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
+          host: '127.0.0.1',
           port: Number(process.env.AUTH_SERVICE_PORT),
         },
       },
