@@ -29,7 +29,15 @@ import { JwtModule } from '@nestjs/jwt';
         transport: Transport.TCP,
         options: {
           host: '127.0.0.1',
-          port: Number(process.env.AUTH_SERVICE_PORT),
+          port: Number(process.env.AUTH_SERVICE_PORT) || 3001,
+        },
+      },
+      {
+        name: 'TASK_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: '127.0.0.1',
+          port: Number(process.env.TASK_SERVICE_PORT) || 3002,
         },
       },
     ]),

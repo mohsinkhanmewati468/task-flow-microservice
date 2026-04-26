@@ -11,31 +11,34 @@ import { ApiGatewayService } from './api-gateway.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { LoginDto, RegisterDto } from '@app/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { firstValueFrom } from 'rxjs';
 
 @Controller()
 export class ApiGatewayController {
   constructor(
     private readonly apiGatewayService: ApiGatewayService,
     @Inject('AUTH_SERVICE') private authClient: ClientProxy,
+    @Inject('TASK_SERVICE') private taskClient: ClientProxy,
   ) {}
-
-  @Get()
-  test() {
-    return this.authClient.send('ping', {});
-  }
   @Post('register')
   register(@Body() body: RegisterDto) {
-    return this.authClient.send('register', body);
+    return firstValueFrom(this.authClient.send('register', body));
   }
 
   @Post('login')
   login(@Body() body: LoginDto) {
-    return this.authClient.send('login', body);
+    return firstValueFrom(this.authClient.send('login', body));
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req) {
+  getProfile(@Req() req: any) {
     return req.user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('task/ping')
+  pingTask() {
+    return firstValueFrom(this.taskClient.send('ping_task', {}));
   }
 }
