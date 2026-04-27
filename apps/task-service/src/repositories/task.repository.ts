@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task, TaskDocument } from '../schemas/task.schema';
 import { Model } from 'mongoose';
-import { CreateTaskDto } from '@app/common';
+import { CreateTaskDto, UpdateTaskDto } from '@app/common';
 @Injectable()
 export class TaskRepositoryService {
   constructor(
@@ -21,5 +21,16 @@ export class TaskRepositoryService {
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
+  }
+  async updateTask(
+    userId: string,
+    taskId: string,
+    updateTaskDto: UpdateTaskDto,
+  ) {
+    return this.taskModel.findOneAndUpdate(
+      { _id: taskId, userId },
+      updateTaskDto,
+      { returnDocument: 'after' },
+    );
   }
 }

@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateTaskDto {
   @IsNotEmpty()
@@ -8,4 +9,10 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   description!: string;
+}
+
+export class UpdateTaskDto extends PartialType(CreateTaskDto) {
+  @IsOptional()
+  @IsIn(['pending', 'completed'])
+  status?: 'pending' | 'completed';
 }

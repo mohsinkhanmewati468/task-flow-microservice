@@ -4,14 +4,21 @@ import {
   DefaultValuePipe,
   Get,
   Inject,
+  Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateTaskDto, LoginDto, RegisterDto } from '@app/common';
+import {
+  CreateTaskDto,
+  LoginDto,
+  RegisterDto,
+  UpdateTaskDto,
+} from '@app/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { firstValueFrom } from 'rxjs';
 import { RolesGuard } from './guards/role.guard';
@@ -62,6 +69,19 @@ export class ApiGatewayController {
   ) {
     return firstValueFrom(
       this.taskClient.send('get-tasks', { userId, page, limit }),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user')
+  @Patch('tasks/update-task/:taskId')
+  updateTask(
+    @User('userId') userId: string,
+    @Param('taskId') taskId: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+  ) {
+    return firstValueFrom(
+      this.taskClient.send('update-task', { userId, taskId, updateTaskDto }),
     );
   }
 }

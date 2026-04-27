@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { TaskServiceService } from './task-service.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CreateTaskDto } from '@app/common';
+import { CreateTaskDto, UpdateTaskDto } from '@app/common';
 
 @Controller()
 export class TaskServiceController {
@@ -24,5 +24,15 @@ export class TaskServiceController {
     limit: number;
   }) {
     return this.taskServiceService.getTasks(userId, page, limit);
+  }
+
+  @MessagePattern('update-task')
+  updateTask(payload: {
+    userId: string;
+    taskId: string;
+    updateTaskDto: UpdateTaskDto;
+  }) {
+    const { userId, taskId, updateTaskDto } = payload;
+    return this.taskServiceService.updateTask(userId, taskId, updateTaskDto);
   }
 }

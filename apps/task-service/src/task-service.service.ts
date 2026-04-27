@@ -1,4 +1,4 @@
-import { CreateTaskDto } from '@app/common';
+import { CreateTaskDto, UpdateTaskDto } from '@app/common';
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { TaskRepositoryService } from './repositories/task.repository';
@@ -57,6 +57,34 @@ export class TaskServiceService {
         success: true,
         data: tasks,
         cached: false,
+      };
+    } catch (err) {
+      if (err instanceof RpcException) {
+        throw err;
+      }
+      this.logger.error('Create task error', err);
+
+      throw new RpcException({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Something went wrong',
+      });
+    }
+  }
+
+  async updateTask(
+    userId: string,
+    taskId: string,
+    updateTaskDto: UpdateTaskDto,
+  ) {
+    try {
+      const updatedTask = await this.taskRepositoryService.updateTask(
+        userId,
+        taskId,
+        updateTaskDto,
+      );
+      return {
+        success: true,
+        data: updatedTask,
       };
     } catch (err) {
       if (err instanceof RpcException) {
