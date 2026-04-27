@@ -1,22 +1,26 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Inject,
+  ParseIntPipe,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiGatewayService } from './api-gateway.service';
 import { ClientProxy } from '@nestjs/microservices';
-import { LoginDto, RegisterDto } from '@app/common';
+import { CreateTaskDto, LoginDto, RegisterDto } from '@app/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { firstValueFrom } from 'rxjs';
+import { RolesGuard } from './guards/role.guard';
+import { Roles } from './common/decorators/roles.decorator';
+import { User } from './common/decorators/user.decorator';
 
 @Controller()
 export class ApiGatewayController {
   constructor(
-    private readonly apiGatewayService: ApiGatewayService,
     @Inject('AUTH_SERVICE') private authClient: ClientProxy,
     @Inject('TASK_SERVICE') private taskClient: ClientProxy,
   ) {}
@@ -36,9 +40,28 @@ export class ApiGatewayController {
     return req.user;
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('task/ping')
-  pingTask() {
-    return firstValueFrom(this.taskClient.send('ping_task', {}));
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user')
+  @Post('tasks/create-task')
+  createTask(
+    @Body() createTaskDto: CreateTaskDto,
+    @User('userId') userId: string,
+  ) {
+    console.log('userId', userId);
+    const payload = { ...createTaskDto, userId };
+    return firstValueFrom(this.taskClient.send('create-task', payload));
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('user')
+  @Get('tasks/get-tasks')
+  getTasks(
+    @User('userId') userId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return firstValueFrom(
+      this.taskClient.send('get-tasks', { userId, page, limit }),
+    );
   }
 }

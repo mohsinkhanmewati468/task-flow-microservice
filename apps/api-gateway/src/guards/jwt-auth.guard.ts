@@ -12,25 +12,28 @@ export class JwtAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
   private readonly logger = new Logger(JwtAuthGuard.name);
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-
-    const authHeader = request.headers['authorization'];
-
-    if (!authHeader || typeof authHeader !== 'string') {
-      throw new UnauthorizedException('No token provided');
-    }
-
-    const [type, token] = authHeader.split(' ');
-
-    if (type !== 'Bearer' || !token) {
-      throw new UnauthorizedException('Invalid token format');
-    }
-
     try {
-      const payload = await this.jwtService.verifyAsync(token);
+      const request = context.switchToHttp().getRequest();
 
-      request.user = payload;
+      const authHeader = request.headers['authorization'];
 
+      if (!authHeader || typeof authHeader !== 'string') {
+        throw new UnauthorizedException('No token provided');
+      }
+
+      const [type, token] = authHeader.split(' ');
+
+      if (type !== 'Bearer' || !token) {
+        throw new UnauthorizedException('Invalid token format');
+      }
+
+      const decoded = await this.jwtService.verifyAsync(token);
+
+      request.user = {
+        userId: decoded.sub,
+        role: decoded.role,
+      };
+      this.logger.log('Auth guard is running');
       return true;
     } catch {
       this.logger.warn('Invalid token attempt');

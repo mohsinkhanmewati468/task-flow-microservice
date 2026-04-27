@@ -5,6 +5,7 @@ import { Logger } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import helmet from 'helmet';
+import { SanitizePipe } from './common/pipes/sanitize.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
@@ -26,6 +27,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
     }),
+    new SanitizePipe(),
   );
   app.useGlobalFilters(new GlobalExceptionFilter());
   await app.listen(port);

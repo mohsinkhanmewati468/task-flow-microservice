@@ -88,7 +88,7 @@ export class AuthServiceService {
           message: 'Invalid credentials',
         });
       }
-      const payload = { sub: user._id.toString(), role: 'user' };
+      const payload = { sub: user._id.toString(), role: user.role };
       const accessToken: string = await this.signToken(payload);
       return {
         success: true,
