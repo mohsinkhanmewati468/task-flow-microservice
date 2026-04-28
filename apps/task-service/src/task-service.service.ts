@@ -4,13 +4,37 @@ import { RpcException } from '@nestjs/microservices';
 import { TaskRepositoryService } from './repositories/task.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
+import {
+  ClientProxy,
+  ClientProxyFactory,
+  Transport,
+  RmqOptions,
+} from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TaskServiceService {
+  private client: ClientProxy;
   constructor(
     private readonly taskRepositoryService: TaskRepositoryService,
+    private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  ) {
+    const rmqOptions: RmqOptions = {
+      transport: Transport.RMQ,
+      options: {
+        urls: [
+          this.configService.get<string>('RABBITMQ_URL') ||
+            'amqp://localhost:5672',
+        ],
+        queue: 'task_event_queue',
+        queueOptions: {
+          durable: false,
+        },
+      },
+    };
+    this.client = ClientProxyFactory.create(rmqOptions);
+  }
   private readonly logger = new Logger(TaskServiceService.name);
   async createTask(createTaskDto: CreateTaskDto, userId: string) {
     try {
@@ -18,6 +42,11 @@ export class TaskServiceService {
         ...createTaskDto,
         userId,
       });
+      if (newTask) {
+        this.client.emit('task_created', {
+          taskId: newTask._id,
+        });
+      }
       return {
         success: true,
         data: newTask,
@@ -82,6 +111,11 @@ export class TaskServiceService {
         taskId,
         updateTaskDto,
       );
+      if (updatedTask?.status === 'completed') {
+        this.client.emit('task_completed', {
+          taskId: updatedTask._id,
+        });
+      }
       return {
         success: true,
         data: updatedTask,

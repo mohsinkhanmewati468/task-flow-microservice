@@ -34,10 +34,13 @@ import { JwtModule } from '@nestjs/jwt';
       },
       {
         name: 'TASK_SERVICE',
-        transport: Transport.TCP,
+        transport: Transport.RMQ,
         options: {
-          host: '127.0.0.1',
-          port: Number(process.env.TASK_SERVICE_PORT) || 3002,
+          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
+          queue: 'task_rpc_queue',
+          queueOptions: {
+            durable: false,
+          },
         },
       },
     ]),

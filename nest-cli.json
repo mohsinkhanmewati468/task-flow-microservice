@@ -37,6 +37,15 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
+    "consumer-service": {
+      "type": "application",
+      "root": "apps/consumer-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/consumer-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/consumer-service/tsconfig.app.json"
+      }
+    },
     "task-service": {
       "type": "application",
       "root": "apps/task-service",
