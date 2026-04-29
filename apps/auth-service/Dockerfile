@@ -7,10 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy only required files
-COPY tsconfig*.json ./
-COPY apps/auth-service ./apps/auth-service
-COPY libs ./libs
+COPY . .
+
 
 # Build only auth-service
 RUN npm run build auth-service

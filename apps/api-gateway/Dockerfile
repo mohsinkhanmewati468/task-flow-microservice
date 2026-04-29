@@ -7,10 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy only required files (not entire repo blindly)
-COPY tsconfig*.json ./
-COPY apps/api-gateway ./apps/api-gateway
-COPY libs ./libs
+COPY . .
+
 
 # Build only api-gateway
 RUN npm run build api-gateway

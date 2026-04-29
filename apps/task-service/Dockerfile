@@ -7,10 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy only required parts
-COPY tsconfig*.json ./
-COPY apps/task-service ./apps/task-service
-COPY libs ./libs
+COPY . .
+
 
 # Build only task-service
 RUN npm run build task-service

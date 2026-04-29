@@ -7,10 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy only required files
-COPY tsconfig*.json ./
-COPY apps/consumer-service ./apps/consumer-service
-COPY libs ./libs
+COPY . .
+
 
 # Build only consumer-service
 RUN npm run build consumer-service

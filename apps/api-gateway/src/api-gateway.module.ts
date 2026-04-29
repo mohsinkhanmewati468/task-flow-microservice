@@ -28,7 +28,7 @@ import { JwtModule } from '@nestjs/jwt';
         name: 'AUTH_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: '127.0.0.1',
+          host: process.env.AUTH_SERVICE_HOST || 'auth-service',
           port: Number(process.env.AUTH_SERVICE_PORT) || 3001,
         },
       },
@@ -36,7 +36,7 @@ import { JwtModule } from '@nestjs/jwt';
         name: 'TASK_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
+          urls: [process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672'],
           queue: 'task_rpc_queue',
           queueOptions: {
             durable: false,
