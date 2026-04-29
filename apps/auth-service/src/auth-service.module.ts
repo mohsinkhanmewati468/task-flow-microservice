@@ -15,7 +15,10 @@ import { JwtModule } from '@nestjs/jwt';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGO_URI');
+        const uri = configService.get<string>(
+          'MONGO_URI',
+          'mongodb://localhost:27017/task-workflow-db',
+        );
 
         if (!uri) {
           throw new Error('MONGO_URI is not defined');

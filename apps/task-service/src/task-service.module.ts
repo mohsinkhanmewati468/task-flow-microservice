@@ -14,7 +14,10 @@ import { createKeyv } from '@keyv/redis';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGO_URI');
+        const uri = configService.get<string>(
+          'MONGO_URI',
+          'mongodb://localhost:27017/task-workflow-db',
+        );
 
         if (!uri) {
           throw new Error('MONGO_URI is not defined');
@@ -27,8 +30,13 @@ import { createKeyv } from '@keyv/redis';
     }),
     MongooseModule.forFeature([{ name: Task.name, schema: TaskSchema }]),
     NestCacheModule.registerAsync({
-      useFactory: () => ({
-        stores: [createKeyv('redis://localhost:6379')],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        stores: [
+          createKeyv(
+            configService.get<string>('REDIS_URL', 'redis://localhost:6379'),
+          ),
+        ],
       }),
     }),
   ],
